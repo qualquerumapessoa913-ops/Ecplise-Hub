@@ -27,8 +27,8 @@ if not reelfinished then warn("❌ reelfinished não encontrado!") end
 -- CONTROLE DE ESTADO (EVITA SPAM)
 -- ============================================
 getgenv().AutoFish = false
-local isFishing = false          -- Impede loops duplicados
-local lastCastTime = 0           -- Anti-spam por tempo
+local isFishing = false
+local lastCastTime = 0
 
 -- ============================================
 -- FUNÇÕES COM ANTI-SPAM
@@ -40,7 +40,6 @@ function cast()
         return false 
     end
     
-    -- Anti-spam: só permite cast a cada 3 segundos
     local now = tick()
     if now - lastCastTime < 3 then
         print("⏳ Aguarde para lançar novamente...")
@@ -83,40 +82,33 @@ end
 -- ============================================
 local function fishLoop()
     while getgenv().AutoFish do
-        -- Se já estiver pescando, espera terminar
         if isFishing then
             print("⏳ Aguardando conclusão da pesca atual...")
             task.wait(2)
             goto continue
         end
         
-        -- 1. Lança a linha (com anti-spam)
         if not cast() then
             task.wait(1)
             goto continue
         end
         
-        -- 2. Aguarda o peixe morder (4-7 segundos)
         local waitTime = math.random(4, 7)
         print("⏳ Aguardando peixe morder (" .. waitTime .. "s)...")
         task.wait(waitTime)
         
-        -- Se o AutoFish foi desligado durante a espera, sai
         if not getgenv().AutoFish then break end
         
-        -- 3. Simula o shake (3-5 vezes)
         local shakeCount = math.random(3, 5)
         print("🎣 Simulando shake (" .. shakeCount .. " vezes)...")
         for i = 1, shakeCount do
             if not getgenv().AutoFish then break end
             shake()
-            task.wait(math.random(30, 70) / 100) -- 0.3-0.7 segundos
+            task.wait(math.random(30, 70) / 100)
         end
         
-        -- 4. Puxa o peixe
         reel()
         
-        -- 5. Aguarda antes do próximo ciclo (5-8 segundos)
         local pauseTime = math.random(5, 8)
         print("⏳ Pausa de " .. pauseTime .. "s antes do próximo cast...")
         task.wait(pauseTime)
@@ -125,7 +117,6 @@ local function fishLoop()
         task.wait(0.5)
     end
     
-    -- Quando desligar, reseta o estado
     isFishing = false
     print("🛑 AutoFish desligado.")
 end
