@@ -1,5 +1,5 @@
 -- ============================================
--- ECLIPSE HUB V3 - SEM SPAM
+-- ECLIPSE HUB V3 - SEM SPAM (CORRIGIDO)
 -- ============================================
 
 print("============================================")
@@ -24,14 +24,14 @@ if not rod_cast then warn("❌ rod_cast não encontrado!") end
 if not reelfinished then warn("❌ reelfinished não encontrado!") end
 
 -- ============================================
--- CONTROLE DE ESTADO (EVITA SPAM)
+-- CONTROLE DE ESTADO
 -- ============================================
 getgenv().AutoFish = false
 local isFishing = false
 local lastCastTime = 0
 
 -- ============================================
--- FUNÇÕES COM ANTI-SPAM
+-- FUNÇÃO CAST
 -- ============================================
 function cast()
     if not rod_cast then return false end
@@ -53,6 +53,9 @@ function cast()
     return true
 end
 
+-- ============================================
+-- FUNÇÃO SHAKE
+-- ============================================
 function shake()
     if not shakeRemote then 
         print("⚠️ Remote de shake não encontrado.")
@@ -64,6 +67,9 @@ function shake()
     return true
 end
 
+-- ============================================
+-- FUNÇÃO REEL
+-- ============================================
 function reel()
     if not reelfinished then return false end
     if not isFishing then
@@ -78,42 +84,38 @@ function reel()
 end
 
 -- ============================================
--- CICLO DE PESCA CONTROLADO
+-- LOOP DE PESCA (SEM GOTO)
 -- ============================================
 local function fishLoop()
     while getgenv().AutoFish do
         if isFishing then
             print("⏳ Aguardando conclusão da pesca atual...")
             task.wait(2)
-            goto continue
+        else
+            if cast() then
+                local waitTime = math.random(4, 7)
+                print("⏳ Aguardando peixe morder (" .. waitTime .. "s)...")
+                task.wait(waitTime)
+                
+                if not getgenv().AutoFish then break end
+                
+                local shakeCount = math.random(3, 5)
+                print("🎣 Simulando shake (" .. shakeCount .. " vezes)...")
+                for i = 1, shakeCount do
+                    if not getgenv().AutoFish then break end
+                    shake()
+                    task.wait(math.random(30, 70) / 100)
+                end
+                
+                reel()
+                
+                local pauseTime = math.random(5, 8)
+                print("⏳ Pausa de " .. pauseTime .. "s antes do próximo cast...")
+                task.wait(pauseTime)
+            else
+                task.wait(1)
+            end
         end
-        
-        if not cast() then
-            task.wait(1)
-            goto continue
-        end
-        
-        local waitTime = math.random(4, 7)
-        print("⏳ Aguardando peixe morder (" .. waitTime .. "s)...")
-        task.wait(waitTime)
-        
-        if not getgenv().AutoFish then break end
-        
-        local shakeCount = math.random(3, 5)
-        print("🎣 Simulando shake (" .. shakeCount .. " vezes)...")
-        for i = 1, shakeCount do
-            if not getgenv().AutoFish then break end
-            shake()
-            task.wait(math.random(30, 70) / 100)
-        end
-        
-        reel()
-        
-        local pauseTime = math.random(5, 8)
-        print("⏳ Pausa de " .. pauseTime .. "s antes do próximo cast...")
-        task.wait(pauseTime)
-        
-        ::continue::
         task.wait(0.5)
     end
     
@@ -166,4 +168,4 @@ Botao.MouseButton1Click:Connect(function()
 end)
 
 print("✅ ECLIPSE HUB V3 CARREGADO!")
-print("💡 Dica: O script agora tem anti-spam e delays realistas!")
+print("💡 O script agora tem anti-spam e delays realistas!")
