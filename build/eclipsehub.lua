@@ -1,9 +1,9 @@
 -- ============================================
--- ECLIPSE HUB V7 - SCRIPT DEFINITIVO (CORRIGIDO)
+-- ECLIPSE HUB V7.1 - CORRIGIDO (RemoteFunction)
 -- ============================================
 
 print("============================================")
-print("  🌑 ECLIPSE HUB V7 - VERSÃO DEFINITIVA")
+print("  🌑 ECLIPSE HUB V7.1 - CORRIGIDO!")
 print("============================================")
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -32,7 +32,7 @@ if fishingEvents then
     Remotes.breakbobber = fishingEvents:FindFirstChild("breakbobber")
     Remotes.catchfinish = fishingEvents:FindFirstChild("catchfinish")
     Remotes.reset = fishingEvents:FindFirstChild("reset")
-    Remotes.castAsync = fishingEvents:FindFirstChild("castAsync")
+    Remotes.castAsync = fishingEvents:FindFirstChild("castAsync")  -- RemoteFunction!
 end
 
 -- ============================================
@@ -42,7 +42,8 @@ print("📊 STATUS DOS REMOTES:")
 local encontrados = 0
 for nome, remote in pairs(Remotes) do
     if remote then
-        print("✅ " .. nome .. " - ENCONTRADO!")
+        local tipo = remote:IsA("RemoteFunction") and "RemoteFunction" or "RemoteEvent"
+        print("✅ " .. nome .. " - " .. tipo .. " ENCONTRADO!")
         encontrados = encontrados + 1
     else
         print("❌ " .. nome .. " - NÃO ENCONTRADO")
@@ -92,10 +93,11 @@ function cast()
     isFishing = true
     print("🎣 1. Lançou a linha (rod_cast)")
     
+    -- castAsync é RemoteFunction! Usa InvokeServer!
     if Remotes.castAsync then
         task.wait(0.2)
-        Remotes.castAsync:FireServer()
-        print("🎣 1.1. castAsync executado!")
+        local result = Remotes.castAsync:InvokeServer()
+        print("🎣 1.1. castAsync executado! Resultado: " .. tostring(result))
     end
     
     return true
@@ -175,7 +177,7 @@ function resetAfterCatch()
 end
 
 -- ============================================
--- LOOP DE PESCA (SEM GOTO)
+-- LOOP DE PESCA
 -- ============================================
 local function fishLoop()
     print("🔄 Iniciando ciclo de pesca definitivo...")
@@ -246,7 +248,7 @@ Corner.Parent = Frame
 local Titulo = Instance.new("TextLabel")
 Titulo.Size = UDim2.new(1, 0, 0, 35)
 Titulo.Position = UDim2.new(0, 0, 0, 5)
-Titulo.Text = "🌑 ECLIPSE HUB V7"
+Titulo.Text = "🌑 ECLIPSE HUB V7.1"
 Titulo.TextColor3 = Color3.fromRGB(255,255,255)
 Titulo.TextSize = 20
 Titulo.Font = Enum.Font.GothamBold
@@ -256,7 +258,7 @@ Titulo.Parent = Frame
 local SubTitulo = Instance.new("TextLabel")
 SubTitulo.Size = UDim2.new(1, 0, 0, 20)
 SubTitulo.Position = UDim2.new(0, 0, 0, 42)
-SubTitulo.Text = "🔥 Versão Definitiva"
+SubTitulo.Text = "🔥 RemoteFunction Corrigida!"
 SubTitulo.TextColor3 = Color3.fromRGB(150, 150, 200)
 SubTitulo.TextSize = 11
 SubTitulo.Font = Enum.Font.Gotham
@@ -326,7 +328,6 @@ spawn(function()
 end)
 
 print("============================================")
-print("✅ ECLIPSE HUB V7 CARREGADO COM SUCESSO!")
-print("🔄 Ciclo: Reset → Cast → Handle → Esperar → Shake → FishMutation → CatchFinish → ReelFinished → BreakBobber → Reset → Pausa")
-print("⏱️ Delays: 6-10s (morder), 8-12x (shake), 12-18s (pausa)")
+print("✅ ECLIPSE HUB V7.1 CARREGADO COM SUCESSO!")
+print("💡 castAsync corrigido: InvokeServer em vez de FireServer")
 print("============================================")
