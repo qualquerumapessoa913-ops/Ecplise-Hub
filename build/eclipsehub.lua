@@ -1,27 +1,28 @@
 -- ============================================
--- ECLIPSE HUB V3 - SEM SPAM (CORRIGIDO)
+-- ECLIPSE HUB V4 - SHAKE CORRETO!
 -- ============================================
 
 print("============================================")
-print("  🌑 ECLIPSE HUB V3 - MODO CONTROLADO")
+print("  🌑 ECLIPSE HUB V4 - SHAKE ENCONTRADO!")
 print("============================================")
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local events = ReplicatedStorage:FindFirstChild("events")
 
 if not events then
-    warn("❌ Pasta 'events' não encontrada! Script pode não funcionar.")
+    warn("❌ Pasta 'events' não encontrada!")
 end
 
 -- ============================================
--- REMOTES
+-- REMOTES (ATUALIZADO!)
 -- ============================================
 local rod_cast = events and events:FindFirstChild("rod_cast")
 local reelfinished = events and events:FindFirstChild("reelfinished")
-local shakeRemote = events and (events:FindFirstChild("shake") or events:FindFirstChild("rod_shake"))
+local shakeRemote = events and events:FindFirstChild("shakehudeffect")  -- ← ESSE É O CERTO!
 
 if not rod_cast then warn("❌ rod_cast não encontrado!") end
 if not reelfinished then warn("❌ reelfinished não encontrado!") end
+if not shakeRemote then warn("❌ shakehudeffect não encontrado!") end
 
 -- ============================================
 -- CONTROLE DE ESTADO
@@ -54,16 +55,16 @@ function cast()
 end
 
 -- ============================================
--- FUNÇÃO SHAKE
+-- FUNÇÃO SHAKE (AGORA COM O REMOTE CERTO!)
 -- ============================================
 function shake()
     if not shakeRemote then 
-        print("⚠️ Remote de shake não encontrado.")
+        print("⚠️ Remote de shake não encontrado!")
         return false 
     end
     
     shakeRemote:FireServer()
-    print("🎣 Sacudiu a vara")
+    print("🎣 Sacudiu a vara (shakehudeffect)")
     return true
 end
 
@@ -84,7 +85,7 @@ function reel()
 end
 
 -- ============================================
--- LOOP DE PESCA (SEM GOTO)
+-- LOOP DE PESCA (COM DELAYS MAIORES)
 -- ============================================
 local function fishLoop()
     while getgenv().AutoFish do
@@ -93,23 +94,27 @@ local function fishLoop()
             task.wait(2)
         else
             if cast() then
-                local waitTime = math.random(4, 7)
+                -- Espera o peixe morder (5-8 segundos)
+                local waitTime = math.random(5, 8)
                 print("⏳ Aguardando peixe morder (" .. waitTime .. "s)...")
                 task.wait(waitTime)
                 
                 if not getgenv().AutoFish then break end
                 
-                local shakeCount = math.random(3, 5)
+                -- Simula o shake (5-8 vezes, com intervalos maiores)
+                local shakeCount = math.random(5, 8)
                 print("🎣 Simulando shake (" .. shakeCount .. " vezes)...")
                 for i = 1, shakeCount do
                     if not getgenv().AutoFish then break end
                     shake()
-                    task.wait(math.random(30, 70) / 100)
+                    task.wait(math.random(40, 90) / 100) -- 0.4-0.9 segundos
                 end
                 
+                -- Puxa o peixe
                 reel()
                 
-                local pauseTime = math.random(5, 8)
+                -- Pausa maior antes do próximo ciclo (8-12 segundos)
+                local pauseTime = math.random(8, 12)
                 print("⏳ Pausa de " .. pauseTime .. "s antes do próximo cast...")
                 task.wait(pauseTime)
             else
@@ -128,7 +133,7 @@ end
 -- ============================================
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Parent = game.CoreGui
-ScreenGui.Name = "EclipseHubV3"
+ScreenGui.Name = "EclipseHubV4"
 
 local Frame = Instance.new("Frame")
 Frame.Size = UDim2.new(0, 200, 0, 100)
@@ -140,7 +145,7 @@ Frame.Parent = ScreenGui
 
 local Titulo = Instance.new("TextLabel")
 Titulo.Size = UDim2.new(1, 0, 0, 30)
-Titulo.Text = "🌑 ECLIPSE HUB V3"
+Titulo.Text = "🌑 ECLIPSE HUB V4"
 Titulo.TextColor3 = Color3.fromRGB(255,255,255)
 Titulo.BackgroundTransparency = 1
 Titulo.Parent = Frame
@@ -167,5 +172,6 @@ Botao.MouseButton1Click:Connect(function()
     end
 end)
 
-print("✅ ECLIPSE HUB V3 CARREGADO!")
-print("💡 O script agora tem anti-spam e delays realistas!")
+print("✅ ECLIPSE HUB V4 CARREGADO!")
+print("💡 Remote de shake encontrado: shakehudeffect")
+print("💡 Delays aumentados para evitar ban!")
