@@ -15,23 +15,34 @@ function Utils.log(msg, tipo)
 end
 
 local Remotes = {}
+-- USANDO OS REMOTES NOVOS!
 Remotes.Map = {
-    PostieSent = ReplicatedStorage:FindFirstChild("PostieSent"),
-    PostieReceived = ReplicatedStorage:FindFirstChild("PostieReceived"),
+    PostieSent = ReplicatedStorage.events:FindFirstChild("rod_cast"),
+    PostieReceived = ReplicatedStorage.events:FindFirstChild("reelfinished"),
 }
 
 function Remotes.cast()
     local remote = Remotes.Map.PostieSent
-    if remote then remote:FireServer() Utils.log("🎣 Lançando linha...", "FISH") return true end
-    Utils.log("❌ Remote nao encontrado!", "ERROR")
-    return false
+    if remote and remote:IsA("RemoteEvent") then
+        remote:FireServer()
+        Utils.log("🎣 Lançando linha...", "FISH")
+        return true
+    else
+        Utils.log("❌ rod_cast não encontrado!", "ERROR")
+        return false
+    end
 end
 
 function Remotes.reel()
     local remote = Remotes.Map.PostieReceived
-    if remote then remote:FireServer() Utils.log("🐟 Puxando peixe!", "FISH") return true end
-    Utils.log("❌ Remote nao encontrado!", "ERROR")
-    return false
+    if remote and remote:IsA("RemoteEvent") then
+        remote:FireServer()
+        Utils.log("🐟 Puxando peixe!", "FISH")
+        return true
+    else
+        Utils.log("❌ reelfinished não encontrado!", "ERROR")
+        return false
+    end
 end
 
 getgenv().AutoFish = false
