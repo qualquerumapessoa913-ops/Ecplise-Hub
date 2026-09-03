@@ -1,11 +1,9 @@
 -- ============================================
--- ECLIPSE HUB V7 - SCRIPT DEFINITIVO
--- BASEADO NA BUSCA COMPLETA DE REMOTES
+-- ECLIPSE HUB V7 - SCRIPT DEFINITIVO (CORRIGIDO)
 -- ============================================
 
 print("============================================")
 print("  🌑 ECLIPSE HUB V7 - VERSÃO DEFINITIVA")
-print("  🔍 Baseado na busca completa de remotes")
 print("============================================")
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -17,11 +15,10 @@ local fishingEvents = ReplicatedStorage:FindFirstChild("shared")
     and ReplicatedStorage.shared.modules.fishing.rodresources:FindFirstChild("events")
 
 -- ============================================
--- TODOS OS REMOTES DE PESCA
+-- REMOTES
 -- ============================================
 local Remotes = {}
 
--- Remotes principais (events)
 Remotes.rod_cast = events and events:FindFirstChild("rod_cast")
 Remotes.shakehudeffect = events and events:FindFirstChild("shakehudeffect")
 Remotes.reelfinished = events and events:FindFirstChild("reelfinished")
@@ -30,7 +27,6 @@ Remotes.rodwave = events and events:FindFirstChild("rodwave")
 Remotes.exalted_rod_animation = events and events:FindFirstChild("exalted_rod_animation")
 Remotes.bite_event_sound = events and events:FindFirstChild("bite_event_sound")
 
--- Remotes de rodresources (fishing)
 if fishingEvents then
     Remotes.handlebobber = fishingEvents:FindFirstChild("handlebobber")
     Remotes.breakbobber = fishingEvents:FindFirstChild("breakbobber")
@@ -40,7 +36,7 @@ if fishingEvents then
 end
 
 -- ============================================
--- STATUS DOS REMOTES
+-- STATUS
 -- ============================================
 print("📊 STATUS DOS REMOTES:")
 local encontrados = 0
@@ -64,7 +60,7 @@ local lastCastTime = 0
 local fishCount = 0
 
 -- ============================================
--- FUNÇÃO: Reset do estado da vara
+-- FUNÇÕES
 -- ============================================
 function resetRod()
     if Remotes.reset then
@@ -75,9 +71,6 @@ function resetRod()
     return false
 end
 
--- ============================================
--- FUNÇÃO: Lançar a linha
--- ============================================
 function cast()
     if not Remotes.rod_cast then 
         print("❌ rod_cast não encontrado!")
@@ -94,13 +87,11 @@ function cast()
         return false
     end
     
-    -- Chama o cast
     Remotes.rod_cast:FireServer()
     lastCastTime = now
     isFishing = true
     print("🎣 1. Lançou a linha (rod_cast)")
     
-    -- Chama castAsync se existir
     if Remotes.castAsync then
         task.wait(0.2)
         Remotes.castAsync:FireServer()
@@ -110,9 +101,6 @@ function cast()
     return true
 end
 
--- ============================================
--- FUNÇÃO: Handle Bobber (pós-cast)
--- ============================================
 function handleBobber()
     if Remotes.handlebobber then
         Remotes.handlebobber:FireServer()
@@ -122,9 +110,6 @@ function handleBobber()
     return false
 end
 
--- ============================================
--- FUNÇÃO: Sacudir a vara
--- ============================================
 function shake()
     if not Remotes.shakehudeffect then
         print("⚠️ shakehudeffect não encontrado!")
@@ -134,7 +119,6 @@ function shake()
     Remotes.shakehudeffect:FireServer()
     print("🎣 3. Sacudiu a vara (shakehudeffect)")
     
-    -- Chama rodwave junto (efeito visual)
     if Remotes.rodwave then
         Remotes.rodwave:FireServer()
         print("   🌊 rodwave ativado!")
@@ -143,9 +127,6 @@ function shake()
     return true
 end
 
--- ============================================
--- FUNÇÃO: Finalizar a pesca
--- ============================================
 function finishFishing()
     if not Remotes.reelfinished then
         print("❌ reelfinished não encontrado!")
@@ -157,27 +138,23 @@ function finishFishing()
         return false
     end
     
-    -- 1. Chama fishMutation
     if Remotes.fishMutation then
         Remotes.fishMutation:FireServer()
         print("🐟 4.1. fishMutation executado!")
         task.wait(0.3)
     end
     
-    -- 2. Chama catchfinish
     if Remotes.catchfinish then
         Remotes.catchfinish:FireServer()
         print("🐟 4.2. catchfinish executado!")
         task.wait(0.3)
     end
     
-    -- 3. Chama reelfinished
     Remotes.reelfinished:FireServer()
     isFishing = false
     fishCount = fishCount + 1
     print("🐟 4.3. Puxou o peixe (reelfinished) #" .. fishCount)
     
-    -- 4. Chama breakbobber (opcional)
     if Remotes.breakbobber then
         task.wait(0.2)
         Remotes.breakbobber:FireServer()
@@ -185,11 +162,8 @@ function finishFishing()
     end
     
     return true
-}
+end
 
--- ============================================
--- FUNÇÃO: Reset final
--- ============================================
 function resetAfterCatch()
     if Remotes.reset then
         task.wait(0.3)
@@ -201,7 +175,7 @@ function resetAfterCatch()
 end
 
 -- ============================================
--- LOOP DE PESCA (COM TODOS OS PASSOS)
+-- LOOP DE PESCA (SEM GOTO)
 -- ============================================
 local function fishLoop()
     print("🔄 Iniciando ciclo de pesca definitivo...")
@@ -211,50 +185,38 @@ local function fishLoop()
             print("⏳ Aguardando conclusão da pesca atual...")
             task.wait(2)
         else
-            -- PASSO 1: Reset da vara (limpa estado anterior)
             resetRod()
             task.wait(0.5)
             
-            -- PASSO 2: Cast
-            if not cast() then
+            if cast() then
+                handleBobber()
+                
+                local waitTime = math.random(6, 10)
+                print("⏳ 2. Aguardando peixe morder (" .. waitTime .. "s)...")
+                task.wait(waitTime)
+                
+                if getgenv().AutoFish then
+                    local shakeCount = math.random(8, 12)
+                    print("🎣 3. Simulando shake (" .. shakeCount .. " vezes)...")
+                    for i = 1, shakeCount do
+                        if not getgenv().AutoFish then break end
+                        shake()
+                        task.wait(math.random(40, 80) / 100)
+                    end
+                    
+                    if getgenv().AutoFish then
+                        finishFishing()
+                        resetAfterCatch()
+                        
+                        local pauseTime = math.random(12, 18)
+                        print("⏳ 6. Pausa de " .. pauseTime .. "s antes do próximo cast...")
+                        task.wait(pauseTime)
+                    end
+                end
+            else
                 task.wait(2)
-                goto continue
             end
-            
-            -- PASSO 3: Handle Bobber (opcional)
-            handleBobber()
-            
-            -- PASSO 4: Esperar o peixe morder (6-10 segundos)
-            local waitTime = math.random(6, 10)
-            print("⏳ 2. Aguardando peixe morder (" .. waitTime .. "s)...")
-            task.wait(waitTime)
-            
-            if not getgenv().AutoFish then break end
-            
-            -- PASSO 5: Shake (8-12 vezes)
-            local shakeCount = math.random(8, 12)
-            print("🎣 3. Simulando shake (" .. shakeCount .. " vezes)...")
-            for i = 1, shakeCount do
-                if not getgenv().AutoFish then break end
-                shake()
-                task.wait(math.random(40, 80) / 100)
-            end
-            
-            if not getgenv().AutoFish then break end
-            
-            -- PASSO 6: Finalizar a pesca
-            finishFishing()
-            
-            -- PASSO 7: Reset após captura
-            resetAfterCatch()
-            
-            -- PASSO 8: Pausa (12-18 segundos - MAIOR!)
-            local pauseTime = math.random(12, 18)
-            print("⏳ 6. Pausa de " .. pauseTime .. "s antes do próximo cast...")
-            task.wait(pauseTime)
         end
-        
-        ::continue::
         task.wait(0.5)
     end
     
@@ -263,7 +225,7 @@ local function fishLoop()
 end
 
 -- ============================================
--- MENU (ATUALIZADO)
+-- MENU
 -- ============================================
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Parent = game.CoreGui
@@ -294,7 +256,7 @@ Titulo.Parent = Frame
 local SubTitulo = Instance.new("TextLabel")
 SubTitulo.Size = UDim2.new(1, 0, 0, 20)
 SubTitulo.Position = UDim2.new(0, 0, 0, 42)
-SubTitulo.Text = "🔥 Versão Definitiva - " .. encontrados .. " remotes"
+SubTitulo.Text = "🔥 Versão Definitiva"
 SubTitulo.TextColor3 = Color3.fromRGB(150, 150, 200)
 SubTitulo.TextSize = 11
 SubTitulo.Font = Enum.Font.Gotham
@@ -351,7 +313,6 @@ Counter.Font = Enum.Font.Gotham
 Counter.BackgroundTransparency = 1
 Counter.Parent = Frame
 
--- Atualiza o status em tempo real
 spawn(function()
     while true do
         local status = "🔴 Desligado"
@@ -364,12 +325,8 @@ spawn(function()
     end
 end)
 
--- ============================================
--- FINALIZAÇÃO
--- ============================================
 print("============================================")
 print("✅ ECLIPSE HUB V7 CARREGADO COM SUCESSO!")
-print("📊 Remotes encontrados: " .. encontrados .. "/" .. #Remotes)
-print("🔄 Ciclo completo: Reset → Cast → Handle → Esperar → Shake → FishMutation → CatchFinish → ReelFinished → BreakBobber → Reset → Pausa")
+print("🔄 Ciclo: Reset → Cast → Handle → Esperar → Shake → FishMutation → CatchFinish → ReelFinished → BreakBobber → Reset → Pausa")
 print("⏱️ Delays: 6-10s (morder), 8-12x (shake), 12-18s (pausa)")
 print("============================================")
